@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn as nn
+import onnx
 from safetensors.torch import save_file, load_file
 from torchinfo import summary  # 可视化模型结构（比原生print更清晰）
 

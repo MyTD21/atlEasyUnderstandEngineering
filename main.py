@@ -2,7 +2,8 @@ import torch.nn as nn
 import torch
 import os
 
-from model_worker import torch_worker
+from model_worker import torch_worker, safetensors_worker, torchscript_worker, onnx_worker
+
 
 class Simple3LayerDNN(nn.Module):
     def __init__(self, input_dim=10, hidden1_dim=64, hidden2_dim=32, output_dim=5):
@@ -42,7 +43,22 @@ def main():
     torch_worker1.write_model(model, os.path.join(MODEL_DIR, "model_weights_all.pt"))
 
     model_rd = Simple3LayerDNN()
-    ret = torch_worker1.read_state_dict(model_rd, os.path.join(MODEL_DIR, "model_weights.pt"), input_shape)
+#    ret = torch_worker1.read_state_dict(model_rd, os.path.join(MODEL_DIR, "model_weights.pt"), input_shape)
+
+    safetensors_worker1 = safetensors_worker()
+    safetensors_worker1.write(model, os.path.join(MODEL_DIR, "model_weights.safetensors"))
+    model_safe = Simple3LayerDNN()
+    safetensors_worker1.read(model_safe, os.path.join(MODEL_DIR, "model_weights.safetensors"))
+
+
+    torchscript_worker1 = torchscript_worker()
+    torchscript_worker1.write(model, example_input, os.path.join(MODEL_DIR, "model_torchscript.pt"))
+    torchscript_worker1.read(os.path.join(MODEL_DIR, "model_torchscript.pt"))
+
+    onnx_worker1 = onnx_worker()
+    onnx_worker1.write(model, example_input, os.path.join(MODEL_DIR, "model.onnx"))
+    onnx_worker1.read(os.path.join(MODEL_DIR, "model.onnx"))
+
 
 
 if __name__ == '__main__':
